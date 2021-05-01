@@ -1,0 +1,8 @@
+<launch>
+ <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy0" output="screen" args="0">  </node>
+ <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy1" args="1"> 
+</node>
+ <node pkg="lab1_deploy_gazebo_students" type="position_plotter.py" name="position_plotter"  args="4">  </node>
+</launch>
+
+
