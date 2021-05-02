@@ -28,8 +28,8 @@ class Plotter():
 		while not rospy.is_shutdown():
 			#print('vamos')
 			plt.clf()
-			#plt.xlim(0,15)
-			#plt.ylim(0,15)
+			plt.xlim(-1,15)
+			plt.ylim(-1,15)
 			for i in range(0,n_robots):
 				plt.plot(self.v_robot_x[i],self.v_robot_y[i],'bo')
 			plt.draw()

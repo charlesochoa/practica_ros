@@ -2,8 +2,7 @@
 # license removed for brevity
 import rospy
 from std_msgs.msg import String
-#from lab1_deploy_gazebo_students.srv import *
-from lab1_deploy_gazebo_students.msg import *
+from ex2_rendezvous.msg import *
 import sys
 from math import radians, copysign, sqrt, pow, pi, atan2
 import numpy as np
@@ -28,8 +27,8 @@ class Plotter():
 		while not rospy.is_shutdown():
 			#print('vamos')
 			plt.clf()
-			#plt.xlim(0,15)
-			#plt.ylim(0,15)
+			plt.xlim(0,100)
+			plt.ylim(0,100)
 			for i in range(0,n_robots):
 				plt.plot(self.v_robot_x[i],self.v_robot_y[i],'bo')
 			plt.draw()

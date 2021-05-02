@@ -158,7 +158,11 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS scripts/talker.py scripts/listener.py scripts/rendezvous_robot_naive.py
+catkin_install_python(PROGRAMS 
+  scripts/talker.py 
+  scripts/listener.py 
+  scripts/rendezvous_robot_naive.py 
+  scripts/position_plotter.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -184,7 +188,7 @@ catkin_install_python(PROGRAMS scripts/talker.py scripts/listener.py scripts/ren
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
+install(FILES
 #   # myfile1
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

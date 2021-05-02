@@ -11,71 +11,88 @@ import numpy as np
 import tf
 
 class Robot():
-	def __init__(self, robot_id):
-    	# Class attributes 
-		self.robot_id = robot_id
-		self.x = 0.0
-		self.y = 0.0
-		self.pub = rospy.Publisher('topic_queue_position_plot', queue_position_plot, queue_size=10)
-		self.pub_goTogoal = rospy.Publisher('topic_GoToGoal_goal'+str(self.robot_id), GoToGoal_goal, queue_size=10)
-		self.ser = rospy.Service('gossip_update'+str(self.robot_id), gossip_update, self.handle_gossip_update)
-		self.act_dummy()
+    def __init__(self, robot_id, x0, y0, Tlocal, robots_ids):
+        # Class attributes 
+        self.robot_id = robot_id
+        self.x = x0
+        self.y = y0
+        self.pub = rospy.Publisher('topic_queue_position_plot', queue_position_plot, queue_size=10)
+        self.set_neig(robots_ids)
+        self.ser = rospy.Service('gossip_update'+str(self.robot_id), gossip_update, self.handle_gossip_update)
+        self.pub_goTogoal = rospy.Publisher('topic_GoToGoal_goal'+str(self.robot_id), GoToGoal_goal, queue_size=10)
+        print(self.neig_id)
+        self.act_dummy(Tlocal)
 
-	def act_dummy(self):
+    def set_neig(self, robots_ids):
+        count = 0
+        ne_tmp = -1
+        if not np.amax(robots_ids) <= self.robot_id:
+            while ne_tmp <= self.robot_id and count < 10000:
+                r = np.random.randint(0, len(robots_ids))
+                ne_tmp = robots_ids[r]
+        self.neig_id = ne_tmp
 
-		rate = rospy.Rate(1/2.0) # once every two seconds
-		if (self.robot_id == 0):
-			neig_id = 1
-			rospy.wait_for_service('gossip_update'+str(neig_id)) # ask for service gossip_update
-			try:
-				print("I request a service")
-				service_gossip_update = rospy.ServiceProxy('gossip_update'+str(neig_id), gossip_update)
-				resp1=service_gossip_update(self.robot_id, 0.0, 1.0)
-				print('Reply received: (', resp1.avg_x, ',', resp1.avg_y)
+    def act_dummy(self, Tlocal):
 
-			except rospy.ServiceException as e:
-				print("Service call failed: %s"%e)
+        rate = rospy.Rate(Tlocal)
+        print(Tlocal)
 
-			print("I publish at topic_queue_position_plot")
-			my_pos_plot=queue_position_plot()
-			my_pos_plot.robot_id=self.robot_id
-			my_pos_plot.x=3.0
-			my_pos_plot.y=4.0
-			self.pub.publish(my_pos_plot)
+        while not rospy.is_shutdown():
+            if (self.neig_id > -1):
+                rospy.wait_for_service('gossip_update'+str(self.neig_id)) # ask for service gossip_update
+                try:
+                    print("I request a service")
+                    service_gossip_update = rospy.ServiceProxy('gossip_update'+str(self.neig_id), gossip_update)
+                    resp1=service_gossip_update(self.robot_id, self.x, self.y)
+                    print('Reply received: (', resp1.avg_x, ',', resp1.avg_y)
+                    self.x = resp1.avg_x
+                    self.y = resp1.avg_y
 
-			print("I publish a navigation goal at topicGoToGoal_goal"+str(self.robot_id))
-			next_pos = GoToGoal_goal()
-			next_pos.goal_coords=[-1.0, 4.0]
-			next_pos.goal_z=0.0 #currently, not used
-			next_pos.speed=0.0 #currently, not used
-			self.pub_goTogoal.publish(next_pos)
-		#Up the here, endif
+                except rospy.ServiceException as e:
+                    print("Service call failed: %s"%e)
 
-		while not rospy.is_shutdown():
-			hello_str = "hello world %s" % rospy.get_time()
-			rospy.loginfo(hello_str)
-			rate.sleep()
+            else:
+                self.x = self.x*0.9
+                self.y = self.y*0.9
 
-	def handle_gossip_update(self, req):
-		# Gossip and use of bx_ij, by_ij for deploying on a line
-		print("I am robot "+str(self.robot_id)+" and I received a gossip_update request: "+str(req.x)+","+str(req.y))
-		myResponse=gossip_updateResponse()
-		myResponse.avg_x=10.3
-		myResponse.avg_y=14.6
-		return myResponse
+            my_pos_plot=queue_position_plot()
+            my_pos_plot.robot_id=self.robot_id
+            my_pos_plot.x=self.x
+            my_pos_plot.y=self.y
+
+            next_pos = GoToGoal_goal()
+            next_pos.goal_coords=[self.x, self.y]
+            next_pos.goal_z=1.0 #currently, not used
+            next_pos.speed=4.0 #currently, not used
+            print("I publish a navigation goal at topicGoToGoal_goal"+str(self.robot_id))
+            self.pub_goTogoal.publish(next_pos)
+            self.pub.publish(my_pos_plot)
+            rospy.loginfo(my_pos_plot)
+            
+            rate.sleep()
+
+    def handle_gossip_update(self, req):
+        # Gossip and use of bx_ij, by_ij for deploying on a line
+        print("I am robot "+str(self.robot_id)+" and I received a gossip_update request: "+str(req.x)+","+str(req.y))
+        myResponse=gossip_updateResponse()
+        myResponse.avg_x=((self.x + (self.robot_id - req.robot_id)*3)*0.2 + req.x*0.8)
+        myResponse.avg_y=(self.y*0.2 + req.y*0.8)
+        return myResponse
 
 
 if __name__ == '__main__':
-	#Input arguments (robot id, x0, y0, Tlocal, neig1, neig2... neign)
-	sysargv = rospy.myargv(argv=sys.argv) # to avoid problems with __name:= elements.
-	num_args=len(sysargv)
-	if (num_args >= 1):
-		robot_id = int(sysargv[1])
-	else:
-		robot_id=0
-	try:
-		rospy.init_node('deploy_'+str(robot_id), anonymous=False)
-		my_naive_robot=Robot(robot_id)
-		print('Finished!')
-	except rospy.ROSInterruptException:
-		pass
+    #Input arguments (robot id, x0, y0, Tlocal, neig1, neig2... neign)
+    sysargv = rospy.myargv(argv=sys.argv) # to avoid problems with __name:= elements.
+    num_args=len(sysargv)
+    if (num_args >= 1):
+        robot_id = int(sysargv[1])
+    else:
+        robot_id=0
+    try:
+        rospy.init_node('deploy_'+str(robot_id), anonymous=False)
+        robots_ids = [ int(arg_str) for arg_str in sysargv[5:] ]
+        print(robots_ids)
+        my_naive_robot=Robot(int(robot_id), float(sysargv[2]), float(sysargv[3]), int(sysargv[4]), robots_ids)
+        print('Finished!')
+    except rospy.ROSInterruptException:
+        pass

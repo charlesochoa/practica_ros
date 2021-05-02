@@ -1,0 +1,19 @@
+<launch>  
+<!-- Robot 1 -->
+  <node pkg="ex2_rendezvous" type="rendezvous_robot_naive.py" name="naive1" output="screen" args="0 2.2 2.2 3 0 1 2 3">  </node>
+ 
+  <!-- Robot 2 -->
+  <node pkg="ex2_rendezvous" type="rendezvous_robot_naive.py" name="naive2" output="screen" args="1 0.2 60.2 3 0 1 2 3">  </node>
+
+  <!-- Robot 3 -->
+  <node pkg="ex2_rendezvous" type="rendezvous_robot_naive.py" name="naive3" output="screen" args="2 5.2 10.2 3 0 1 2 3"> </node> 
+
+    <!-- Robot 4 -->
+  <node pkg="ex2_rendezvous" type="rendezvous_robot_naive.py" name="leader" output="screen" args="3 20.2 80.2 3 0 1 2 3"> </node> 
+
+    <!-- Plotter -->
+  <node pkg="ex2_rendezvous" type="position_plotter.py" name="plotter" output="screen" args="4 0 1 2 3"> </node> 
+
+</launch>
+
+

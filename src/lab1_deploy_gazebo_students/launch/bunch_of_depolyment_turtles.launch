@@ -1,8 +1,48 @@
-<launch>
- <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy0" output="screen" args="0">  </node>
- <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy1" args="1"> 
-</node>
- <node pkg="lab1_deploy_gazebo_students" type="position_plotter.py" name="position_plotter"  args="4">  </node>
+<launch>  
+  <arg name="first_tb3_x_pos" default="3.0"/>
+  <arg name="first_tb3_y_pos" default="1.2"/>
+  <arg name="first_tb3_z_pos" default="0.0"/>
+  <arg name="first_tb3_yaw"   default="0.0"/>
+
+  <arg name="second_tb3_x_pos" default=" 6.2"/>
+  <arg name="second_tb3_y_pos" default=" 1.5"/>
+  <arg name="second_tb3_z_pos" default=" 0.0"/>
+  <arg name="second_tb3_yaw"   default=" 0.0"/>
+
+  <arg name="third_tb3_x_pos" default=" 9.0"/>
+  <arg name="third_tb3_y_pos" default=" 4.0"/>
+  <arg name="third_tb3_z_pos" default=" 0.0"/>
+  <arg name="third_tb3_yaw"   default=" 0.0"/>
+
+  <arg name="fourth_tb3_x_pos" default=" 4.5"/>
+  <arg name="fourth_tb3_y_pos" default=" 6.7"/>
+  <arg name="fourth_tb3_z_pos" default=" 0.0"/>
+  <arg name="fourth_tb3_yaw"   default=" 0.0"/>
+  
+  <arg name="fifth_tb3_x_pos" default=" 2.5"/>
+  <arg name="fifth_tb3_y_pos" default=" 5.7"/>
+  <arg name="fifth_tb3_z_pos" default=" 0.0"/>
+  <arg name="fifth_tb3_yaw"   default=" 0.0"/>
+
+  <arg name="sixth_tb3_x_pos" default=" 1.5"/>
+  <arg name="sixth_tb3_y_pos" default=" 2.7"/>
+  <arg name="sixth_tb3_z_pos" default=" 0.0"/>
+  <arg name="sixth_tb3_yaw"   default=" 0.0"/>
+<!-- Robot 1 -->
+  <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy0" output="screen" args="0 $(arg first_tb3_x_pos) $(arg first_tb3_y_pos) 3 0 1 2 3">  </node>
+ 
+  <!-- Robot 2 -->
+  <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy1" output="screen" args="1 $(arg second_tb3_x_pos) $(arg second_tb3_y_pos) 3 0 1 2 3">  </node>
+
+  <!-- Robot 3 -->
+  <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy2" output="screen" args="2  $(arg third_tb3_x_pos) $(arg third_tb3_y_pos)  3 0 1 2 3"> </node> 
+
+    <!-- Robot 4 -->
+  <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot.py" name="deploy3" output="screen" args="3  $(arg fourth_tb3_x_pos) $(arg fourth_tb3_y_pos)  3 0 1 2 3"> </node> 
+
+    <!-- Plotter -->
+  <node pkg="lab1_deploy_gazebo_students" type="position_plotter.py" name="plotter" output="screen" args="4 0 1 2 3"> </node>
+
 </launch>
 
 

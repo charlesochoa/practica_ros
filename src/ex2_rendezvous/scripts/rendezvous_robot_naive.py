@@ -49,20 +49,30 @@ class Robot():
 
                 except rospy.ServiceException as e:
                     print("Service call failed: %s"%e)
+            else:
+                self.x += 0
+                self.y += 0
             my_pos_plot=queue_position_plot()
             my_pos_plot.robot_id=self.robot_id
             my_pos_plot.x=self.x
             my_pos_plot.y=self.y
             self.pub.publish(my_pos_plot)
             rospy.loginfo(my_pos_plot)
+            
+            print("I publish a navigation goal at topicGoToGoal_goal"+str(self.robot_id))
+            next_pos = GoToGoal_goal()
+            next_pos.goal_coords=[-1.0, 4.0]
+            next_pos.goal_z=1.0 #currently, not used
+            next_pos.speed=1.0 #currently, not used
+            self.pub_goTogoal.publish(next_pos)
             rate.sleep()
 
     def handle_gossip_update(self, req):
         # Gossip and use of bx_ij, by_ij for deploying on a line
         print("I am robot "+str(self.robot_id)+" and I received a gossip_update request: "+str(req.x)+","+str(req.y))
         myResponse=gossip_updateResponse()
-        myResponse.avg_x=(self.x + req.x)/2.0
-        myResponse.avg_y=(self.y + req.y)/2.0
+        myResponse.avg_x=((self.x + (self.robot_id - req.robot_id)*3)*0.2 + req.x*0.8)
+        myResponse.avg_y=(self.y*0.2 + req.y*0.8)
         return myResponse
 
 
